@@ -1,8 +1,8 @@
-import { AnyZodObject } from "zod";
+import { ZodTypeAny } from "zod";
 import { Request, Response, NextFunction } from "express";
 
 export const zodValidate =
-    (schema: AnyZodObject) =>
+    (schema: ZodTypeAny) =>
         (req: Request, res: Response, next: NextFunction) => {
             try {
                 schema.parse({
@@ -11,10 +11,10 @@ export const zodValidate =
                     params: req.params,
                 });
                 next();
-            } catch (error) {
+            } catch (error: any) {
                 return res.status(400).json({
                     message: "Validation failed",
-                    errors: (error as any).errors,
+                    errors: error?.errors ?? error?.issues ?? error,
                 });
             }
         };
