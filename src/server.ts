@@ -6,7 +6,11 @@ import { z } from "zod";
 import { zodValidate } from "./middlewares/zodValidate";
 import { asyncHandler } from "./middlewares/asyncHandler";
 import { errorHandler } from "./middlewares/errorHandler";
+import { authMiddleware } from "./middlewares/auth.middleware";
+
 import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/auth.routes";
+
 
 // ✅ CREATE APP FIRST
 const app = express();
@@ -15,6 +19,7 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use("/api/auth", authRoutes);
 
 // ✅ Routes
 app.use("/api/users", userRoutes);
@@ -46,4 +51,11 @@ const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`🚀 API running on http://localhost:${PORT}`);
+});
+
+app.get("/api/profile", authMiddleware, (req: any, res) => {
+  res.json({
+    message: "Protected route accessed",
+    user: req.user,
+  });
 });
