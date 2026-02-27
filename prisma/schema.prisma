@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  WRITER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  role      Role     @default(WRITER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+
+  @@index([email])
+}
+
+model Post {
+  id         String         @id @default(uuid())
+  title      String
+  slug       String         @unique
+  content    Json
+  excerpt    String?
+  status     String         @default("DRAFT")
+  authorId   String
+  author     User           @relation(fields: [authorId], references: [id])
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  categories PostCategory[]
+  images     Image[]
+
+  @@index([slug])
+  @@index([authorId])
+}
+
+model Category {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  slug      String         @unique
+  posts     PostCategory[]
+  createdAt DateTime       @default(now())
+
+  @@index([slug])
+}
+
+model PostCategory {
+  postId     String
+  categoryId String
+  post       Post     @relation(fields: [postId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([postId, categoryId])
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  alt       String?
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}

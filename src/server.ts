@@ -2,16 +2,24 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { z } from "zod";
+
 import { zodValidate } from "./middlewares/zodValidate";
 import { asyncHandler } from "./middlewares/asyncHandler";
 import { errorHandler } from "./middlewares/errorHandler";
+import userRoutes from "./routes/user.routes";
 
+// ✅ CREATE APP FIRST
 const app = express();
 
+// ✅ Global Middlewares
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
+// ✅ Routes
+app.use("/api/users", userRoutes);
+
+// Health check
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
@@ -31,10 +39,11 @@ app.post(
   })
 );
 
-// Central error handler (last)
+// ✅ Error handler MUST be last
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
   console.log(`🚀 API running on http://localhost:${PORT}`);
 });
